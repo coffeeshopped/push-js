@@ -42,10 +42,13 @@ maxAPI.addHandlers(handlers)
 push.midiOutListener = (bytes) => maxAPI.outlet(["midi"].concat(bytes))
 
 for (let i=0; i<8; ++i) {
-  state.knobs[i].link(pushRx)
+  state.knobs[i].subscribe(pushRx.turns)
   state.knobs[i].action.subscribe(evt => {
+    console.log(evt)
     maxAPI.outlet(["knob", i, evt[1]])
   })  
+  pushRx.addDisplay(state.knobs[i].displayObservable())
 }
 
-state.pager.link(pushRx)
+state.pager.subscribe(pushRx.buttons)
+pushRx.addDisplay(state.pager.displayObservable())

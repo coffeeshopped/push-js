@@ -28,10 +28,9 @@ module.exports = class extends Widget {
     return latest.pipe(Rx.map(a => display(...a)))
   }
 
-  buttonSubscribe(buttons) {
-    const _this = this
+  subscribe(buttons) {
     const latest = Rx.withLatestFrom(this.value, this.pageCount)
-    const sub = buttons.pipe(latest, Rx.map(([b, value, pageCount]) => {
+    const newPage = buttons.pipe(latest, Rx.map(([b, value, pageCount]) => {
       // b: button, state
       
       // ignore button up
@@ -43,20 +42,10 @@ module.exports = class extends Widget {
       if (selected >= pageCount) { return -1 }
       
       return selected
-    })).subscribe(newVal => {
-      if (newVal < 0) { return }
-      
-      _this.value.next(newVal)
-      _this.action.next(["value", newVal])
-    })
-    return sub
-  }
-  
-  createLinkSubscriptions(pushRx) {
-    const sub = this.buttonSubscribe(pushRx.buttons)
-  
-    sub.add(pushRx.addDisplay(this.displayObservable()))
+    }), Rx.filter(v => v >= 0))
     
+    const sub = newPage.subscribe(this.value) // self-updates value on actions
+    sub.add(this.subscribeAction(newPage))
     return sub
   }
   

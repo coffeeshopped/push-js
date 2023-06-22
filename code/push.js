@@ -82,6 +82,13 @@ class Push {
     this.listeners[i] = null
   }
   
+  // Possible Push Events:
+  //
+  // [Push.Event.TURN, Push.Knob, knobDelta]
+  // [Push.Event.BUTTON, Push.Button, on/off (bool)]
+  // [Push.Event.TOUCH, pitch, on/off (bool)]
+  // [Push.Event.PAD, pitch, velo]
+  
   ccIn(ctrl, value) {  
     var event = false
   

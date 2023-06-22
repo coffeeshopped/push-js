@@ -4,8 +4,10 @@ module.exports = class {
   // event output
   action = new Rx.Subject()
   
-  // flow of push instances for connecting/disconnecting widgets
-  pushRx = new Rx.BehaviorSubject(null)
+  // converts a stream of values to action events and binds to this.action
+  subscribeAction(valueObservable) {
+    return valueObservable.pipe(Rx.map(v => ["action", v])).subscribe(this.action)    
+  }  
 }
 
 
