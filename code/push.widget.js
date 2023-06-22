@@ -1,117 +1,14 @@
 const Rx = require('rxjs')
 
 module.exports = class {
-  
+  // event output
   action = new Rx.Subject()
-  pushRx = null
-  linkSubscription = null
   
-  link(pushRx) {    
-    this.unlink()
-    this.pushRx = pushRx
-    this.linkSubscription = this.createLinkSubscriptions(pushRx)
-  }
-  
-  createLinkSubscriptions(pushRx) {
-    return null
-  }
-  
-  unlink() {
-    this.pushRx = null
-    if (this.linkSubscription) {
-      this.linkSubscription.unsubscribe()
-      this.linkSubscription = null
-    }
-    this.unlinkChildren()
-  }
-  
-  unlinkChildren() {
-    
-  }
+  // flow of push instances for connecting/disconnecting widgets
+  pushRx = new Rx.BehaviorSubject(null)
 }
 
-// var PushC = require("push.const").PushC
-// 
-// function PushWidget(patcher) {
-//   this.patcher = patcher
-//   // this.maxobjListeners = {}
-//   // this.slotMap = {}
-//   this.autoBoundControls = { }
-//   this.widgetLibs = {}
-// }
-// 
-// PushWidget.prototype.name = function() {
-//   return this.patcher.box.varname
-// }
-// 
-// PushWidget.prototype.createWidgetForSubpatcherNamed = function(name, options) {
-//   var bpatcher = this.patcher.getnamed(name)
-//   var libFile = bpatcher.subpatcher().name
-//   if (!this.widgetLibs[libFile]) {
-//     this.widgetLibs[libFile] = require(libFile)
-//   }
-//   var widgetLib = this.widgetLibs[libFile]
-//   return new widgetLib.Widget(bpatcher.subpatcher(), options)
-// }
-// 
-// 
-// PushWidget.prototype.createBoundKnob = function(name, slot, label) {
-//   var ctrl = new PushKnob(slot, label)
-//   var maxobj = null
-//   if (name.indexOf("::") < 0) {
-//     maxobj = this.patcher.getnamed(name)
-//     if (!maxobj) {
-//       post("ERR linking: "+name)
-//       post()
-//     }
-//   }
-//   else {
-//     var parts = name.split("::")
-//     var patcher = this.patcher
-//     for (var i=0; i<parts.length; ++i) {
-//       maxobj = patcher.getnamed(parts[i])
-//       if (!maxobj) {
-//         post("ERR getting: "+parts[i])
-//         post()
-//       }
-//       if (i < parts.length - 1) {
-//         patcher = maxobj.subpatcher()
-//       }
-//     }
-//   }
-//   ctrl.bind(maxobj)
-//   return ctrl
-// }
-// 
-// PushWidget.prototype.autoBindKnob = function(name, slot, label) {
-//   var ctrl = new PushKnob(slot, label)
-//   this.autoBind(name, ctrl)
-// }
-// 
-// PushWidget.prototype.autoBindToggle = function(name, button) {
-//   var ctrl = new PushToggle(button)
-//   this.autoBind(name, ctrl)
-// }
-// 
-// PushWidget.prototype.autoBind = function(name, ctrl) {
-//   ctrl.bind(this.patcher.getnamed(name))
-//   this.autoBoundControls[name] = ctrl
-// }
-// 
-// PushWidget.prototype.linkAutoBound = function(push) {
-//   var keys = Object.keys(this.autoBoundControls)
-//   for (var i=0; i<keys.length; ++i) {
-//     this.autoBoundControls[keys[i]].link(push)
-//   }
-// }
-// 
-// PushWidget.prototype.unlinkAutoBound = function() {
-//   var keys = Object.keys(this.autoBoundControls)
-//   for (var i=0; i<keys.length; ++i) {
-//     this.autoBoundControls[keys[i]].unlink()
-//   }
-// }
-// 
+
 // PushWidget.prototype.autoBindPaged = function(pages) {
 //   var _this = this
 //   this.pageRadio = new PushRadio(0, 0, pages.length)
