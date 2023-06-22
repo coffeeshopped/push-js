@@ -2,9 +2,9 @@
 	"name" : "max-push",
 	"version" : 1,
 	"creationdate" : 3770055578,
-	"modificationdate" : 3770055578,
-	"viewrect" : [ 0.0, 0.0, 300.0, 500.0 ],
-	"autoorganize" : 1,
+	"modificationdate" : 3770294117,
+	"viewrect" : [ 7.0, 87.0, 300.0, 500.0 ],
+	"autoorganize" : 0,
 	"hideprojectwindow" : 0,
 	"showdependencies" : 1,
 	"autolocalize" : 0,
@@ -15,6 +15,10 @@
 				"local" : 1,
 				"toplevel" : 1
 			}
+
+		}
+,
+		"code" : 		{
 
 		}
 
