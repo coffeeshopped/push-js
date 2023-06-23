@@ -33,17 +33,24 @@ module.exports = class extends Widget {
     return Rx.merge(this.pager.displayObservable(), kd)    
   }
   
-  subscribe(turns, buttons) {
+  subscribe(bundle) {
     const pager = this.pager
-    const sub = pager.subscribe(buttons) // pager is always subscribed
+    const sub = pager.subscribe(bundle) // pager is always subscribed
     
-    for (let p=0; p<8; ++p) {
-      const t = pager.value.pipe(Rx.switchMap(page => page == p ? turns : Rx.EMPTY))
-      this.knobs[p].forEach(k => sub.add(k.subscribe(t)))
-    }
-    
-    // TODO: output actions from knobs, yeah?
-    
+    this.knobs.forEach((knobPage, p) => {
+      const pfx = ['page', p]
+      const newBundle = {
+        turns: pager.value.pipe(Rx.switchMap(page => page == p ? bundle.turns : Rx.EMPTY)),
+        commands: Widget.filteredCommands(bundle.commands, pfx)
+      }
+
+      knobPage.forEach(k => sub.add(k.subscribe(newBundle)))
+      
+      const knobActions = Rx.merge(...(knobPage.map((k, i) => k.actions)))
+      sub.add(Widget.prefixedActions(knobActions, pfx).subscribe(this.actions))
+
+    })
+            
     return sub
   }
   

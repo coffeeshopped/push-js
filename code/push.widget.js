@@ -2,12 +2,59 @@ const Rx = require('rxjs')
 
 module.exports = class {
   // event output
-  action = new Rx.Subject()
+  actions = new Rx.Subject()
   
-  // converts a stream of values to action events and binds to this.action
-  subscribeAction(valueObservable) {
-    return valueObservable.pipe(Rx.map(v => ["action", v])).subscribe(this.action)    
-  }  
+  /*
+   * subscribes the widget to listen to "bundled" events. bundle object:
+   * {
+   *   turns: Push knob turn events
+   *   buttons: Push button press events
+   *   touches: Push knob touch events
+   *   pads: Push pad press events
+   *   commands: Command events. Array of the form [path, value, path, value, etc]
+   *             e.g [page 2 knob 0 value 63] might set the value of the first knob on the 3rd *             page to 63
+   *             These commands will be sent by code from software (e.g. Max, network comm etc)
+   *             whereas all the other events are from the Push.
+   * }
+   * Note that these streams of Push events are not necessarily the raw stream of all events from the Push. Compound widgets will process these event streams in various ways before passing the filtered/modified events down to sub-widgets.
+   */
+   // should be called by some outside object during the setup phase.
+  subscribe(bundle) {
+    
+  }
+  
+  subscribePropertyCommands(commands, cmdMap) {
+    if (!commands) { return }
+    
+    const _this = this
+    return commands.subscribe(cmd => {
+      // command must have at least 2 elements
+      if (cmd.length < 2) { return }
+      
+      // cmdMap must have a Subject matching the command
+      const subject = cmdMap[cmd[0]]
+      if (!subject) { return }
+      
+      // pass the command's value to the Subject
+      subject.next(cmd[1])
+    })
+  }
+  
+  // filter a command observable with an array prefix
+  static filteredCommands(commands, pfx) {
+    if (!commands) { return null }
+    const len = pfx.length
+    return commands.pipe(
+      Rx.filter(cmd => cmd.length >= len && pfx.every((val, i) => val === cmd[i])),
+      Rx.map(cmd => cmd.slice(len))
+    )
+  }
+  
+  // return an observable, prefixed
+  static prefixedActions(actions, pfx) {
+    return actions.pipe(Rx.map(action => pfx.concat(action)))
+  }
+
 }
 
 

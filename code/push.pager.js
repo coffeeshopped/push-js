@@ -28,9 +28,9 @@ module.exports = class extends Widget {
     return latest.pipe(Rx.map(a => display(...a)))
   }
 
-  subscribe(buttons) {
+  subscribe(bundle) {
     const latest = Rx.withLatestFrom(this.value, this.pageCount)
-    const newPage = buttons.pipe(latest, Rx.map(([b, value, pageCount]) => {
+    const newPage = bundle.buttons.pipe(latest, Rx.map(([b, value, pageCount]) => {
       // b: button, state
       
       // ignore button up
@@ -45,7 +45,13 @@ module.exports = class extends Widget {
     }), Rx.filter(v => v >= 0))
     
     const sub = newPage.subscribe(this.value)
-    sub.add(this.subscribeAction(newPage))
+    sub.add(Widget.prefixedActions(newPage, ["value"]).subscribe(this.actions))
+    
+    sub.add(this.subscribePropertyCommands(bundle.commands, {
+      value: this.value,
+      pageCount: this.pageCount,
+    }))
+
     return sub
   }
   

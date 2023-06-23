@@ -12,55 +12,73 @@ function adjustValue(value, inc, min, max) {
 
 module.exports = class extends Widget {
   
-  slot = new BehaviorSubject(0)
+  slot = 0
   label = new BehaviorSubject("knob.")
   value = new BehaviorSubject(0)
   min = new BehaviorSubject(0)
   max = new BehaviorSubject(127)
   inc = new BehaviorSubject(1)
+  hidden = new BehaviorSubject(0)
   
   constructor(slot, label) {
     super()
-    this.slot.next(slot)
+    this.slot = slot
     this.label.next(label)
-        
-    // sub.add(pushRx.addDisplay(this.displayLabelObservable()))
-    // sub.add(pushRx.addDisplay(this.displayValueObservable()))
   }
   
   displayLabelObservable() {
-    const latest = Rx.combineLatest([this.slot, this.label])
-    return latest.pipe(Rx.map(a => [PushRx.textCmd(0, ...a)]))
+    const slot = this.slot
+    const latest = Rx.combineLatest(this.hidden, this.label)
+    return latest.pipe(
+      Rx.map(([hidden, l]) => [PushRx.textCmd(0, slot, hidden > 0 ? "" : l)])
+    )
   }
 
   displayValueObservable() {
-    const latest = Rx.combineLatest([this.slot, this.value])
-    return latest.pipe(Rx.map(a => [PushRx.textCmd(1, ...a)]))
+    const slot = this.slot
+    const latest = Rx.combineLatest(this.hidden, this.value)
+    return latest.pipe(
+      Rx.map(([hidden, v]) => [PushRx.textCmd(1, slot, hidden > 0 ? "" : v)])
+    )
   }
 
   displayObservable() {
     return Rx.merge(this.displayLabelObservable(), this.displayValueObservable())
   }
 
-  // should be called by some outside object during the setup phase. the outside object should control the flow of turn events
-  // expects Observable<[Push.Knob, knobDelta]> (like pushRx emits from turns)  
-  subscribe(turns) {
-    
+  subscribe(bundle) {
     // each time a turn event comes in, if it's the knob we're watching, output what the adjusted value should be
     // based on inc, max, min
-    const latest = Rx.withLatestFrom(this.value, this.inc, this.min, this.max, this.slot)
+    const slot = this.slot
+    const latest = Rx.withLatestFrom(this.value, this.inc, this.min, this.max, this.hidden)
     
-    const adjustedValue = turns.pipe(latest, Rx.map(([turn, v, inc, min, max, slot]) => {
+    // expects Observable<[Push.Knob, knobDelta]> (like pushRx emits from turns)  
+    const adjustedValue = bundle.turns.pipe(latest, Rx.map(([turn, v, inc, min, max, hidden]) => {
+      if (hidden) { return false }
       if (turn[0] - Push.Knob.BIG_0 != slot) { return false }
       
       return adjustValue(v, inc * turn[1], min, max)
     }), Rx.filter(v => v !== false ))
     
     // TODO: add option to not self-update value
-    const sub = adjustedValue.subscribe(this.value)
-    sub.add(this.subscribeAction(adjustedValue))
+    const sub = Widget.prefixedActions(adjustedValue, ["knob", slot, "value"]).subscribe(this.actions)
+    // sub.add(adjustedValue.subscribe(this.value))
+    
+    const filteredCommands = Widget.filteredCommands(bundle.commands, ['knob', slot])
+
+    // commands
+    sub.add(this.subscribePropertyCommands(filteredCommands, {
+      label: this.label,
+      value: this.value,
+      min: this.min,
+      max: this.max,
+      inc: this.inc,
+      hidden: this.hidden,
+    }))
+        
     return sub
   }
-    
+  
+  
 }
 
