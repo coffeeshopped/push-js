@@ -41,9 +41,25 @@ module.exports = class extends Widget {
       Rx.map(([hidden, v]) => [PushRx.textCmd(1, slot, hidden > 0 ? "" : v)])
     )
   }
+  
+  displayVisualObservable() {
+    const slot = this.slot
+    const latest = Rx.combineLatest(this.hidden, this.value, this.min, this.max)
+    return latest.pipe(
+      Rx.map(([hidden, v, min, max]) => {
+        const pct = Math.max(0.0, Math.min((v - min) / (max - min), 1.0))
+        const bars = Math.floor(pct * 16.0)
+        const doubleBars = Math.floor(bars / 2)
+        const singleBars = bars % 2
+        const dashes = 8 - (doubleBars + singleBars)
+        const viz = "║".repeat(doubleBars) + "├".repeat(singleBars) + "─".repeat(dashes)
+        return [PushRx.textCmd(2, slot, hidden > 0 ? "" : viz)]
+      })
+    )
+  }
 
   displayObservable() {
-    return Rx.merge(this.displayLabelObservable(), this.displayValueObservable())
+    return Rx.merge(this.displayLabelObservable(), this.displayValueObservable(), this.displayVisualObservable())
   }
 
   subscribe(bundle) {

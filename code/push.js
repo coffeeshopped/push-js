@@ -46,11 +46,7 @@ class Push {
   }
   
   static Char = "↑↓≡├┤║─¤¦°ÄÇÖÜßàäçèéêîñö÷øüь…█→←"
-  /* 
-   *
-   * ↑↓≡├┤║─¤¦°ÄÇÖÜßàäçèéêîñö÷øüь…█→←
-   * 
-   */
+
 
   // returns sysex midi int representing the given char at index in a string
   static intForChar(string, index) {
@@ -63,7 +59,7 @@ class Push {
   displayTextRow(row) {
     var bytes = [240, 71, 127, 21, row + 24, 0, 69, 0]
     for (var i=0; i<68; ++i) {
-      bytes.push(this.textRows[row].charCodeAt(i))
+      bytes.push(Push.intForChar(this.textRows[row], i))
     }
     bytes.push(247)
     this.#midiOut(bytes)
