@@ -44,7 +44,7 @@ module.exports = class extends Widget {
       return selected
     }), Rx.filter(v => v >= 0))
     
-    const sub = newPage.subscribe(this.value) // self-updates value on actions
+    const sub = newPage.subscribe(this.value)
     sub.add(this.subscribeAction(newPage))
     return sub
   }

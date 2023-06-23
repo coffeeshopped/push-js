@@ -45,6 +45,21 @@ class Push {
     this.displayTextRow(row)
   }
   
+  static Char = "↑↓≡├┤║─¤¦°ÄÇÖÜßàäçèéêîñö÷øüь…█→←"
+  /* 
+   *
+   * ↑↓≡├┤║─¤¦°ÄÇÖÜßàäçèéêîñö÷øüь…█→←
+   * 
+   */
+
+  // returns sysex midi int representing the given char at index in a string
+  static intForChar(string, index) {
+    const code = string.charCodeAt(index)
+    if (code > 31 && code < 128) { return code }
+    const i = Push.Char.indexOf(string.charAt(index))
+    return i >= 0 ? i : 33 // return "!" if not found
+  }
+
   displayTextRow(row) {
     var bytes = [240, 71, 127, 21, row + 24, 0, 69, 0]
     for (var i=0; i<68; ++i) {

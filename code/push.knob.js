@@ -56,11 +56,10 @@ module.exports = class extends Widget {
       return adjustValue(v, inc * turn[1], min, max)
     }), Rx.filter(v => v !== false ))
     
-    // we don't actually update our own value
-    // instead, send out an action proposing what the new value *should* be
-    // logic outside of the knob should feed this new value in, if successful, which will trigger UI updates
-    // TODO: add option to self-update value
-    return this.subscribeAction(adjustedValue)
+    // TODO: add option to not self-update value
+    const sub = adjustedValue.subscribe(this.value)
+    sub.add(this.subscribeAction(adjustedValue))
+    return sub
   }
     
 }
