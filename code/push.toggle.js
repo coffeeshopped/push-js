@@ -14,6 +14,7 @@ module.exports = class extends Widget {
   constructor(button) {
     super()
     this.button = Push.Button[button]
+    this.buttonCmd = button.toLowerCase()
   }
   
   displayObservable() {
@@ -38,10 +39,13 @@ module.exports = class extends Widget {
       Rx.filter(v => v >= 0)
     )
     
-    const sub = newValue.subscribe(this.value)
-    sub.add(Widget.prefixedActions(newValue, ["value"]).subscribe(this.actions))
+    // when new value depends on old value, action subscription needs to happen before value sub
+        
+    const sub = Widget.prefixedActions(newValue, [this.buttonCmd, "value"]).subscribe(this.actions)
+    sub.add(newValue.subscribe(this.value))
     
-    sub.add(this.subscribePropertyCommands(bundle.commands, {
+    const filteredCommands = Widget.filteredCommands(bundle.commands, [this.buttonCmd])
+    sub.add(this.subscribePropertyCommands(filteredCommands, {
       value: this.value,
       onState: this.onState,
       offState: this.offState,
