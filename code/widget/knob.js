@@ -1,8 +1,8 @@
-const Push = require("./push")
-const PushRx = require("./push.rx")
+const Push = require("../push")
+const PushRx = require("../push.rx")
 const Rx = require('rxjs')
 const BehaviorSubject = Rx.BehaviorSubject
-const Widget = require('./push.widget')
+const Widget = require('./widget')
 
 
 function adjustValue(value, inc, min, max) {

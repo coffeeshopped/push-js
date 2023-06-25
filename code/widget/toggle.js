@@ -1,8 +1,8 @@
 
-const Push = require("./push")
-const PushRx = require("./push.rx")
+const Push = require("../push")
+const PushRx = require("../push.rx")
 const Rx = require('rxjs')
-const Widget = require('./push.widget')
+const Widget = require('./widget')
 
 module.exports = class extends Widget {
   
@@ -26,22 +26,23 @@ module.exports = class extends Widget {
 
   subscribe(bundle) {
     const button = this.button
+    const processPush = this.processPush
     const newValue = bundle.buttons.pipe(
       Rx.withLatestFrom(this.value),
       Rx.map(([b, v]) => {
-        // b: button, state
-        // ignore button up
-        if (!b[1]) { return -1 }
-        if (b[0] != button) { return -1 }
-              
-        return 1 - v
+        // b: button, state (bool)
+        if (b[0] != button) { return false }
+        return processPush(b[1] ? 1 : 0, v)
       }), 
-      Rx.filter(v => v >= 0)
+      Rx.filter(v => v !== false)
     )
     
     // when new value depends on old value, action subscription needs to happen before value sub
-        
     const sub = Widget.prefixedActions(newValue, [this.buttonCmd, "value"]).subscribe(this.actions)
+    // sub.add(this.actions.pipe(
+    //   Rx.filter(a => a[1] == "value"),
+    //   Rx.map(a => a[2])
+    // ).subscribe(this.value))
     sub.add(newValue.subscribe(this.value))
     
     const filteredCommands = Widget.filteredCommands(bundle.commands, [this.buttonCmd])
@@ -52,6 +53,12 @@ module.exports = class extends Widget {
     }))
 
     return sub
+  }
+  
+  processPush(inValue, currentValue) {
+    // ignore button up
+    if (!inValue) { return false }
+    return 1 - currentValue
   }
   
 }
