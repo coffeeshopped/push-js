@@ -8,7 +8,7 @@ module.exports = class extends Widget {
   
   value = new Rx.BehaviorSubject(0) // 0 or 1
   onState = new Rx.BehaviorSubject(Push.BState.ON)
-  offState = new Rx.BehaviorSubject(Push.BState.OFF)
+  offState = new Rx.BehaviorSubject(Push.BState.DIM)
   
   // button: string value corresponding to Push constant
   constructor(button) {

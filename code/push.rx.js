@@ -44,6 +44,7 @@ module.exports = class {
     return display.subscribe(cmds => {
       // console.log(cmds)
       cmds.forEach(cmd => {
+        if (cmd.length < 2) { return }
         switch (cmd[0]) {
           case "displayText":
             _this.push.displayText(...cmd.slice(1))
