@@ -15,12 +15,21 @@ const Rx = require('rxjs')
 //   })
 // })
 
+const Commands = {
+  TEXT: 'TEXT',
+  BUTTON: 'BUTTON',
+  PAD: 'PAD',
+  FULL_PAD: 'FULL_PAD',
+}
+
+
 module.exports = class {
   
   push = null
   
   turns = new Rx.Subject()
   buttons = new Rx.Subject()
+  pads = new Rx.Subject()
 
   constructor(push) {
     this.push = push
@@ -35,6 +44,9 @@ module.exports = class {
           // button, true/false
           _this.buttons.next([event[1], event[2]])
           break
+        case Push.Event.PAD:
+          _this.pads.next([event[1], event[2], event[3]])
+          break
       }
     })
   }
@@ -46,22 +58,37 @@ module.exports = class {
       cmds.forEach(cmd => {
         if (cmd.length < 2) { return }
         switch (cmd[0]) {
-          case "displayText":
+          case Commands.TEXT:
             _this.push.displayText(...cmd.slice(1))
             break
-          case "displayButton":
+          case Commands.BUTTON:
             _this.push.displayButton(...cmd.slice(1))
+            break
+          case Commands.PAD:
+            _this.push.displayPad(...cmd.slice(1))
+            break
+          case Commands.FULL_PAD:
+            _this.push.displayPadFull(...cmd.slice(1))
             break
         }
       })
     })
   }
-  
+    
   static textCmd(row, slot, text) {
-    return ['displayText', row, slot, text + ""]
+    return [Commands.TEXT, row, slot, text + ""]
   }
   
   static buttonCmd(button, state) {
-    return ['displayButton', button, state]
+    return [Commands.BUTTON, button, state]
   }
+  
+  static padCmd(x, y, state) {
+    return [Commands.PAD, x, y, state]
+  }
+
+  static fullPadCmd(x, y, hexColor) {
+    return [Commands.FULL_PAD, x, y, hexColor]
+  }
+  
 }

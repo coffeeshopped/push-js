@@ -1,4 +1,9 @@
 
+const padForNote = (note) => {
+  const v = note - 36
+  return [v % 8, Math.floor(v / 8)]
+}
+
 class Push {
 
   static initTextRow = "                                                                    "
@@ -69,9 +74,17 @@ class Push {
     this.#midiOut([0xb0, button, state])
   }
   
-  displayPad(row, col, state) {
-    var pad = Push.noteForPad(row, col)
+  displayPad(x, y, state) {
+    var pad = Push.noteForPad(x, y)
     this.#midiOut([0x90, pad, state])
+  }
+  
+  displayPadFull(x, y, color) {
+    const r = (color >> 16) & 0xff
+    const g = (color >> 8) & 0xff
+    const b = color & 0xff
+    const pad = x + y * 8 // Push.noteForPad(x, y)
+    this.#midiOut([240, 71, 127, 21, 4, 0, 8, pad, 0, r >> 4, r & 0xf, g >> 4, g & 0xf, b >> 4, b & 0xf, 247])
   }
   
   
@@ -122,7 +135,7 @@ class Push {
       event = [Push.Event.TOUCH, pitch, velo > 0]
     }
     else {
-      event = [Push.Event.PAD, pitch, velo]
+      event = [Push.Event.PAD, ...(padForNote(pitch)), velo]
     }
     
     this.#processEvent(event)
@@ -245,14 +258,37 @@ class Push {
     ON_FAST: 6
   }
   
-  static noteForPad(row, col) {
-    return 36 + col + ((7 - row) * 8)
-  }
+  // lower-left is 0,0
+  static noteForPad = (x, y) => 36 + x + (y * 8)
+  
+  static padForNote = padForNote
   
   static PState = {
     off: 0,
     on: 9,
   }
+    
+//   static PadColor = {
+//     BLACK: 0
+//     DARK_GREY: 1
+//     GREY: 2
+//     WHITE: 3
+//     RED: 5
+//     AMBER: 9
+//     YELLOW: 13
+//     LIME: 17
+//     GREEN: 21
+//     SPRING: 25
+//     TURQUOISE: 29
+//     CYAN: 33
+//     SKY: 37
+//     OCEAN: 41
+//     BLUE: 45
+//     ORCHID: 49
+//     MAGENTA: 53
+//     PINK: 57
+// 
+//   }
   
 }
 
