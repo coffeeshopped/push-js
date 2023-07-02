@@ -4,6 +4,83 @@ const padForNote = (note) => {
   return [v % 8, Math.floor(v / 8)]
 }
 
+const Button = {
+  TAP_TEMPO: 3,
+  METRONOME: 9,
+  
+  REP_1_4: 0x24,
+  REP_1_4T: 0x25,
+  REP_1_8: 0x26,
+  REP_1_8T: 0x27,
+  REP_1_16: 0x28,
+  REP_1_16T: 0x29,
+  REP_1_32: 0x2a,
+  REP_1_32T: 0x2b,
+  
+  LEFT: 0x2c,
+  RIGHT: 0x2d,
+  UP: 0x2e,
+  DOWN: 0x2f,
+  
+  SELECT: 0x30,
+  SHIFT: 0x31,
+  NOTE: 0x32,
+  SESSION: 0x33,
+  ADD_EFFECT: 0x34,
+  ADD_TRACK: 0x35,
+  OCTAVE_DOWN: 0x36,
+  OCTAVE_UP: 0x37,
+  REPEAT: 0x38,
+  ACCENT: 0x39,
+  SCALES: 0x3a,
+  USER: 0x3b,
+  MUTE: 0x3c,
+  SOLO: 0x3d,
+  IN: 0x3e,
+  OUT: 0x3f,
+  
+  PLAY: 0x55,
+  RECORD: 0x56,
+  NEW: 0x57,
+  DUPLICATE: 0x58,
+  AUTOMATION: 0x59,
+  FIXED_LENGTH: 0x5a,
+  
+  DEVICE: 0x6e,
+  BROWSE: 0x6f,
+  TRACK: 0x70,
+  CLIP: 0x71,
+  VOLUME: 0x72,
+  PAN_SEND: 0x73,
+  
+  QUANTIZE: 0x74,
+  DOUBLE: 0x75,
+  DELETE: 0x76,
+  UNDO: 0x77,
+  
+  ROW_0_0: 0x14,
+  ROW_0_1: 0x15,
+  ROW_0_2: 0x16,
+  ROW_0_3: 0x17,
+  ROW_0_4: 0x18,
+  ROW_0_5: 0x19,
+  ROW_0_6: 0x1a,
+  ROW_0_7: 0x1b,
+  
+  MASTER: 0x1c,
+  STOP: 0x1d,
+
+  ROW_1_0: 0x66,
+  ROW_1_1: 0x67,
+  ROW_1_2: 0x68,
+  ROW_1_3: 0x69,
+  ROW_1_4: 0x6a,
+  ROW_1_5: 0x6b,
+  ROW_1_6: 0x6c,
+  ROW_1_7: 0x6d,
+  
+}
+
 class Push {
 
   static initTextRow = "                                                                    "
@@ -28,9 +105,21 @@ class Push {
     this.displayTextRow(3)
   }
   
+  clear() {
+    this.initText()
+    this.clearPads()
+    this.clearButtons()
+  }
+    
   clearPads() {
     for (var i=36; i<100; ++i) {
       this.#midiOut([0x90, i, 0])
+    }
+  }
+  
+  clearButtons() {
+    for (let key in Button) {
+      this.displayButton(Push.Button[key], 0)
     }
   }
   
@@ -171,82 +260,7 @@ class Push {
     BUTTON: 4,
   }
   
-  static Button = {
-    TAP_TEMPO: 3,
-    METRONOME: 9,
-    
-    REP_1_4: 0x24,
-    REP_1_4T: 0x25,
-    REP_1_8: 0x26,
-    REP_1_8T: 0x27,
-    REP_1_16: 0x28,
-    REP_1_16T: 0x29,
-    REP_1_32: 0x2a,
-    REP_1_32T: 0x2b,
-    
-    LEFT: 0x2c,
-    RIGHT: 0x2d,
-    UP: 0x2e,
-    DOWN: 0x2f,
-    
-    SELECT: 0x30,
-    SHIFT: 0x31,
-    NOTE: 0x32,
-    SESSION: 0x33,
-    ADD_EFFECT: 0x34,
-    ADD_TRACK: 0x35,
-    OCTAVE_DOWN: 0x36,
-    OCTAVE_UP: 0x37,
-    REPEAT: 0x38,
-    ACCENT: 0x39,
-    SCALES: 0x3a,
-    USER: 0x3b,
-    MUTE: 0x3c,
-    SOLO: 0x3d,
-    IN: 0x3e,
-    OUT: 0x3f,
-    
-    PLAY: 0x55,
-    RECORD: 0x56,
-    NEW: 0x57,
-    DUPLICATE: 0x58,
-    AUTOMATION: 0x59,
-    FIXED_LENGTH: 0x5a,
-    
-    DEVICE: 0x6e,
-    BROWSE: 0x6f,
-    TRACK: 0x70,
-    CLIP: 0x71,
-    VOLUME: 0x72,
-    PAN_SEND: 0x73,
-    
-    QUANTIZE: 0x74,
-    DOUBLE: 0x75,
-    DELETE: 0x76,
-    UNDO: 0x77,
-    
-    ROW_0_0: 0x14,
-    ROW_0_1: 0x15,
-    ROW_0_2: 0x16,
-    ROW_0_3: 0x17,
-    ROW_0_4: 0x18,
-    ROW_0_5: 0x19,
-    ROW_0_6: 0x1a,
-    ROW_0_7: 0x1b,
-    
-    MASTER: 0x1c,
-    STOP: 0x1d,
-  
-    ROW_1_0: 0x66,
-    ROW_1_1: 0x67,
-    ROW_1_2: 0x68,
-    ROW_1_3: 0x69,
-    ROW_1_4: 0x6a,
-    ROW_1_5: 0x6b,
-    ROW_1_6: 0x6c,
-    ROW_1_7: 0x6d,
-    
-  }
+  static Button = Button
   
   static BState = {
     OFF: 0,

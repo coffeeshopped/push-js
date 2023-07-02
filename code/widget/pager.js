@@ -4,11 +4,11 @@ const PushRx = require("../push.rx")
 const Rx = require('rxjs')
 const Widget = require('./widget')
 
-function display(value, pageCount) {
+function display(row, value, pageCount) {
   let cmds = []
   for (let i=0; i<8; ++i) {
     const state = i >= pageCount ? Push.BState.OFF : (i == value ? Push.BState.ON : Push.BState.DIM)
-    cmds.push(PushRx.buttonCmd(Push.Button["ROW_0_"+i], state))
+    cmds.push(PushRx.buttonCmd(Push.Button["ROW_"+row+"_"+i], state))
   }
   return cmds
 }
@@ -17,27 +17,32 @@ module.exports = class extends Widget {
   
   value = new Rx.BehaviorSubject(0)
   pageCount = new Rx.BehaviorSubject(1)
+  row = 0
   
-  constructor(pageCount) {
+  constructor(row, pageCount) {
     super()
+    this.row = row
     this.pageCount.next(pageCount)
   }
   
   displayObservable() {
+    const row = this.row
     const latest = Rx.combineLatest([this.value, this.pageCount])
-    return latest.pipe(Rx.map(a => display(...a)))
+    return latest.pipe(Rx.map(a => display(row, ...a)))
   }
 
   subscribe(bundle) {
     const latest = Rx.withLatestFrom(this.value, this.pageCount)
+    const rowMin = this.row == 0 ? 0x14 : 0x66
+    const rowMax = this.row == 0 ? 0x1b : 0x6d
     const newPage = bundle.buttons.pipe(latest, Rx.map(([b, value, pageCount]) => {
       // b: button, state
       
       // ignore button up
       if (!b[1]) { return -1 }
-      if (b[0] < 0x14 && b[0] > 0x1b) { return -1 }
+      if (b[0] < rowMin && b[0] > rowMax) { return -1 }
       
-      const selected = b[0] - 0x14
+      const selected = b[0] - rowMin
       
       if (selected >= pageCount) { return -1 }
       

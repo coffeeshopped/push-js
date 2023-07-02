@@ -8,7 +8,7 @@ const Pager = require('./pager')
 module.exports = class extends Widget {
   
   knobs = []
-  pager = new Pager(8)
+  pager = new Pager(0, 8)
 
   constructor() {
     super()
