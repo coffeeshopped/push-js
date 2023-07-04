@@ -37,11 +37,22 @@ module.exports = class extends Widget {
     const pager = this.pager
     const sub = pager.subscribe(bundle) // pager is always subscribed
     
+    const processedCmds = bundle.commands.pipe(
+      Rx.mergeMap(cmd => {
+        if (cmd.length == 1 && cmd[0] == 'reset') {
+          return Rx.from(this.knobs.flatMap((knobPage, p) => {
+            return knobPage.map((knob, k) =>  ['page', p, 'knob', k, 'hidden', 1])
+          }))
+        }
+        return Rx.of(cmd)
+      })
+    )
+    
     this.knobs.forEach((knobPage, p) => {
       const pfx = ['page', p]
       const newBundle = {
         turns: pager.value.pipe(Rx.switchMap(page => page == p ? bundle.turns : Rx.EMPTY)),
-        commands: Widget.filteredCommands(bundle.commands, pfx)
+        commands: Widget.filteredCommands(processedCmds, pfx)
       }
 
       knobPage.forEach(k => sub.add(k.subscribe(newBundle)))
@@ -50,7 +61,7 @@ module.exports = class extends Widget {
       sub.add(Widget.prefixedActions(knobActions, pfx).subscribe(this.actions))
 
     })
-            
+
     return sub
   }
   

@@ -49,7 +49,6 @@ module.exports = class extends Widget {
       Rx.scan((acc, ws) => {
         if (acc) { acc.unsubscribe() }
         
-        console.log('hiya')
         if (ws.length == 0) { return null }
   
         const topWidget = ws[0]
