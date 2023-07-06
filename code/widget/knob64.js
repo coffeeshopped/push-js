@@ -3,7 +3,7 @@ const Rx = require('rxjs')
 const BehaviorSubject = Rx.BehaviorSubject
 const Widget = require('./widget')
 const Knob = require('./knob')
-const Pager = require('./pager')
+const Pager = require('./Pager')
 
 module.exports = class extends Widget {
   

@@ -30,6 +30,10 @@ module.exports = class extends Widget {
     const latest = Rx.combineLatest([this.value, this.pageCount])
     return latest.pipe(Rx.map(a => display(row, ...a)))
   }
+  
+  displayCleanup() {
+    return display(this.row, -1, 0)
+  }
 
   subscribe(bundle) {
     const latest = Rx.withLatestFrom(this.value, this.pageCount)

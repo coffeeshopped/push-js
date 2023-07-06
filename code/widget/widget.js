@@ -4,6 +4,19 @@ module.exports = class {
   // event output
   actions = new Rx.Subject()
   
+  /**
+   * PushRx drawing commands to render this Widget.
+   * @return {Observable<[Array]>} An Observable of arrays of commands
+   */
+  displayObservable() { return Rx.of([]) }
+  
+  /**
+   * PushRx drawing commands to remove this widget. Resets every Push UI element within
+   * the bounds of this Widget.
+   * @return {[Array]} An array of commands
+   */
+  displayCleanup() { return [] }
+  
   /*
    * subscribes the widget to listen to "bundled" events. bundle object:
    * {

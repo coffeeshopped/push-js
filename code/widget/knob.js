@@ -61,6 +61,15 @@ module.exports = class extends Widget {
   displayObservable() {
     return Rx.merge(this.displayLabelObservable(), this.displayValueObservable(), this.displayVisualObservable())
   }
+  
+  displayCleanup() {
+    const slot = this.slot
+    return [
+      PushRx.textCmd(0, slot, ""),
+      PushRx.textCmd(1, slot, ""),
+      PushRx.textCmd(2, slot, ""),
+    ]
+  }
 
   subscribe(bundle) {
     // each time a turn event comes in, if it's the knob we're watching, output what the adjusted value should be
