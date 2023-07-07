@@ -1,8 +1,8 @@
+const Rx = require('rxjs')
 
 const Push = require("../push")
 const PushRx = require("../push.rx")
-const Rx = require('rxjs')
-const Widget = require('./widget')
+const Widget = require('./Widget')
 
 function display(row, value, pageCount) {
   let cmds = []

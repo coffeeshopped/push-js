@@ -1,6 +1,7 @@
-const maxAPI = require("max-api")
-const Push = require("./push")
 const Rx = require('rxjs')
+const maxAPI = require("max-api")
+
+const Push = require("./push")
 const PushRx = require('./push.rx')
 
 const push = new Push()
@@ -34,7 +35,7 @@ const bundle = {
   commands: commands,
 }
 
-const Knob64 = require('./push.knob64')
+const Knob64 = require('./widget/Knob64')
 const knob64 = new Knob64()
 knob64.subscribe(bundle)
 pushRx.addDisplay(knob64.displayObservable())
@@ -42,7 +43,7 @@ knob64.actions.subscribe(action => {
   maxAPI.outlet(["action"].concat(action))
 })
 
-const Toggle = require('./push.toggle')
+const Toggle = require('./widget/ttoggle')
 
 const toggles = []
 for(key in Push.Button) { 

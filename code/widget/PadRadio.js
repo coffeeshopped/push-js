@@ -1,8 +1,9 @@
-const Push = require("../push")
-const PushRx = require("../push.rx")
 const Rx = require('rxjs')
 const BehaviorSubject = Rx.BehaviorSubject
-const Widget = require('./widget')
+
+const Push = require("../push")
+const PushRx = require("../push.rx")
+const Widget = require('./Widget')
 
 function display(origin, rows, cols, value, on, off) {
   const cmds = []

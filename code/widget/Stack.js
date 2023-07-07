@@ -1,8 +1,9 @@
-const Push = require("../push")
 const Rx = require('rxjs')
 const BehaviorSubject = Rx.BehaviorSubject
-const Widget = require('./widget')
-const Knob = require('./knob')
+
+const Push = require("../push")
+const Widget = require('./Widget')
+const Knob = require('./Knob')
 const Pager = require('./Pager')
 
 module.exports = class extends Widget {
