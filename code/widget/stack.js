@@ -7,8 +7,10 @@ const Pager = require('./Pager')
 
 module.exports = class extends Widget {
   
-  widgets = []
   displayObs = new Rx.BehaviorSubject([])
+  
+  // [[widget stack], widget-if-popped]
+  widgets = new Rx.BehaviorSubject([[], null])
 
   constructor() {
     super()
@@ -32,29 +34,34 @@ module.exports = class extends Widget {
     
     const widgetStack = Widget.filteredCommands(bundle.commands, ["stack"]).pipe(
       Rx.scan((acc, cmd) => {
+        const stack = acc[0]
         switch (cmd[0]) {
           case 'push':
-            // unsubscribe the top widget, if it exists
-            // subscribe the new top widget
             const newTop = cmd[1]
             // push the new widget
-            return [newTop].concat(acc)
+            return [[newTop].concat(stack), null]
           case 'pop':
-            return acc.slice(1)
+            // return popped stack, with popped widget
+            return stack.length == 0 ? [[], null] : [stack.slice(1), stack[0]]
         }
-      }, [])
+      }, [[], null]) // [[widget stack], widget-if-popped]
     )
 
     const sub = widgetStack.pipe(
       Rx.scan((acc, ws) => {
         if (acc) { acc.unsubscribe() }
         
-        if (ws.length == 0) { return null }
+        const stack = ws[0]
+        const popped = ws[1]
+
+        if (stack.length == 0) { return null }
   
-        const topWidget = ws[0]
+        const topWidget = stack[0]
+        
+        // subscribe top widget to bundle, including un-prefixed commands
         const newSub = topWidget.subscribe(subBundle)
         
-        // actions
+        // pass actions from top widget to stack's actions (no prefix?)
         newSub.add(topWidget.actions.subscribe(_this.actions))
                 
         return newSub
@@ -63,9 +70,18 @@ module.exports = class extends Widget {
     
     sub.add(widgetStack.pipe(
       Rx.switchMap(ws => {
-        return ws.length == 0 ? Rx.EMPTY : ws[0].displayObservable()
+        const stack = ws[0]
+        const popped = ws[1]
+        
+        // first, do cleanup from any popped widget
+        const cleanup = popped ? Rx.of(popped.displayCleanup()) : Rx.EMPTY
+        // then, draw the new top widget
+        const next = stack.length == 0 ? Rx.EMPTY : stack[0].displayObservable()
+        return Rx.concat(cleanup, next)
       })
     ).subscribe(this.displayObs))
+    
+    sub.add(widgetStack.subscribe(this.widgets))
     
     return sub
   }

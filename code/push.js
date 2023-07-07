@@ -105,6 +105,12 @@ class Push {
     this.displayTextRow(3)
   }
   
+  clearTextRow(row) {
+    this.textRows[row] = Push.initTextRow
+    this.displayTextRow(row)
+  }
+
+  
   clear() {
     this.initText()
     this.clearPads()
@@ -122,7 +128,7 @@ class Push {
       this.displayButton(Push.Button[key], 0)
     }
   }
-  
+    
   displayText(row, slot, text) {
     var newRow = this.textRows[row]
     var padded = text

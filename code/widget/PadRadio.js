@@ -23,7 +23,7 @@ module.exports = class extends Widget {
   rows = 1
   cols = 1
   
-  // fn: (x,y) => pad state
+  // fn: (x,y) => pad color
   onState = new Rx.BehaviorSubject((x, y) => 0xffffff)
   offState = new Rx.BehaviorSubject((x, y) => 0x111111)
 
@@ -42,7 +42,7 @@ module.exports = class extends Widget {
     const c = this.cols
     const latest = Rx.combineLatest(this.value, this.onState, this.offState)
     return latest.pipe(
-      Rx.map(([v, on, off]) =>  display(o, r, c, v, on, off))
+      Rx.map(([v, on, off]) => display(o, r, c, v, on, off))
     )
   }
   

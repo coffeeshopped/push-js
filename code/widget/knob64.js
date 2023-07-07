@@ -1,6 +1,8 @@
-const Push = require("../push")
 const Rx = require('rxjs')
 const BehaviorSubject = Rx.BehaviorSubject
+
+const Push = require("../push")
+const PushRx = require("../push.rx")
 const Widget = require('./widget')
 const Knob = require('./knob')
 const Pager = require('./Pager')
@@ -31,6 +33,10 @@ module.exports = class extends Widget {
       return Rx.merge(...knobDisplays)
     }))
     return Rx.merge(this.pager.displayObservable(), kd)    
+  }
+  
+  displayCleanup() {
+    return this.pager.displayCleanup().concat([PushRx.clearTextCmd()])
   }
   
   subscribe(bundle) {
