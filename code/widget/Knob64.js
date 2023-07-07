@@ -65,7 +65,6 @@ module.exports = class extends Widget {
       
       const knobActions = Rx.merge(...(knobPage.map((k, i) => k.actions)))
       sub.add(Widget.prefixedActions(knobActions, pfx).subscribe(this.actions))
-
     })
 
     return sub

@@ -81,9 +81,18 @@ const Button = {
   
 }
 
-class Push {
+const Char = "↑↓≡├┤║─¤¦°ÄÇÖÜßàäçèéêîñö÷øüь…█→←"
 
-  static initTextRow = "                                                                    "
+function intForChar(string, index) {
+  const code = string.charCodeAt(index)
+  if (code > 31 && code < 128) { return code }
+  const i = Char.indexOf(string.charAt(index))
+  return i >= 0 ? i : 33 // return "!" if not found
+}
+
+const initTextRow = "                                                                    "
+
+class Push {
   
   listenerCounter = 0
   listeners = []
@@ -96,18 +105,14 @@ class Push {
   }
     
   initText() {
-    this.textRows = [
-      Push.initTextRow, Push.initTextRow, Push.initTextRow, Push.initTextRow
-    ]
-    this.displayTextRow(0)
-    this.displayTextRow(1)
-    this.displayTextRow(2)
-    this.displayTextRow(3)
+    this.displayTextLine(0, initTextRow)
+    this.displayTextLine(1, initTextRow)
+    this.displayTextLine(2, initTextRow)
+    this.displayTextLine(3, initTextRow)
   }
   
   clearTextRow(row) {
-    this.textRows[row] = Push.initTextRow
-    this.displayTextRow(row)
+    this.displayTextLine(row, initTextRow)
   }
 
   
@@ -128,42 +133,22 @@ class Push {
       this.displayButton(Push.Button[key], 0)
     }
   }
-    
-  displayText(row, slot, text) {
-    var newRow = this.textRows[row]
-    var padded = text
-    if (text.length > 8) {
-      padded = text.slice(0,8)
-    }
-    else if (text.length < 8) {
-      var space = "        "
-      padded = text + space.slice(0, 8 - text.length)
-    }
-    var slotStart = slot * 8 + Math.ceil(slot / 2.0)
-    newRow = newRow.slice(0, slotStart) + padded + newRow.slice(slotStart + 8)
-    this.textRows[row] = newRow
-    this.displayTextRow(row)
-  }
-  
-  static Char = "↑↓≡├┤║─¤¦°ÄÇÖÜßàäçèéêîñö÷øüь…█→←"
-
+      
+  static Char = Char
 
   // returns sysex midi int representing the given char at index in a string
-  static intForChar(string, index) {
-    const code = string.charCodeAt(index)
-    if (code > 31 && code < 128) { return code }
-    const i = Push.Char.indexOf(string.charAt(index))
-    return i >= 0 ? i : 33 // return "!" if not found
-  }
-
-  displayTextRow(row) {
+  static intForChar = intForChar
+  
+  /* Assumes that text is the correct length (68 bytes) */
+  displayTextLine(row, text) {
     var bytes = [240, 71, 127, 21, row + 24, 0, 69, 0]
     for (var i=0; i<68; ++i) {
-      bytes.push(Push.intForChar(this.textRows[row], i))
+      bytes.push(intForChar(text, i))
     }
     bytes.push(247)
     this.#midiOut(bytes)
   }
+
   
   displayButton(button, state) {
     this.#midiOut([0xb0, button, state])
@@ -311,9 +296,5 @@ class Push {
 //   }
   
 }
-
-
-
-
 
 module.exports = Push
