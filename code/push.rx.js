@@ -71,6 +71,7 @@ module.exports = class {
   
   // handle a batch of text-related commands, condensing them where possible
   handleText(cmds) {
+    const _this = this
     cmds.forEach(cmd => {
       if (cmd.length < 1) { return }
       switch (cmd[0]) {
@@ -92,16 +93,16 @@ module.exports = class {
     if (cmd.length < 1) { return }
     switch (cmd[0]) {
       case Commands.BUTTON:
-        _this.push.displayButton(...cmd.slice(1))
+        this.push.displayButton(...cmd.slice(1))
         break
       case Commands.PAD:
-        _this.push.displayPad(...cmd.slice(1))
+        this.push.displayPad(...cmd.slice(1))
         break
       case Commands.FULL_PAD:
-        _this.push.displayPadFull(...cmd.slice(1))
+        this.push.displayPadFull(...cmd.slice(1))
         break
       case Commands.CLEAR_PADS:
-        _this.push.clearPads()
+        this.push.clearPads()
         break
     }
   }
