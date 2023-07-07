@@ -100,8 +100,6 @@ class Push {
   midiOutListener = null
   
   constructor() {
-    this.initText()
-    this.clearPads()  
   }
     
   initText() {
