@@ -1,10 +1,9 @@
-const Rx = require('rxjs')
+import * as Rx from 'rxjs'
+import { Push } from "../push.js"
+import { PushRx } from "../push.rx.js"
+import { Widget } from './Widget.js'
 
-const Push = require("../push")
-const PushRx = require("../push.rx")
-const Widget = require('./Widget')
-
-module.exports = class extends Widget {
+export class Ttoggle extends Widget {
   
   value = new Rx.BehaviorSubject(0) // 0 or 1
   onState = new Rx.BehaviorSubject(Push.BState.ON)

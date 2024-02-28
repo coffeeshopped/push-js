@@ -1,0 +1,24 @@
+{
+  "name": "push-js",
+  "version": "0.1.0",
+  "description": "A Javascript framework for working with the Ableton Push (1). Easily build widget-based UIs using Javascript.",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coffeeshopped/push-js.git"
+  },
+  "author": "Chadwick Wood <chadwick@coffeeshopped.com> (https://coffeeshopped.com)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/coffeeshopped/push-js/issues"
+  },
+  "homepage": "https://github.com/coffeeshopped/push-js#readme",
+  "dependencies": {
+    "easymidi": "^3.1.0",
+    "rxjs": "^7.8.1"
+  }
+}

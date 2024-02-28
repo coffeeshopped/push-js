@@ -1,7 +1,7 @@
-const Rx = require('rxjs')
 
-const Push = require("./push")
-const TextBuffer = require('./TextBuffer')
+import * as Rx from 'rxjs'
+import { Push } from "./push.js"
+import { TextBuffer } from './TextBuffer.js'
 
 const Commands = {
   TEXT: 'TEXT',
@@ -14,7 +14,7 @@ const Commands = {
 }
 
 
-module.exports = class {
+export class PushRx {
   
   push = null
   buffer = new TextBuffer()

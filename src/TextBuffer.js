@@ -1,7 +1,7 @@
 
 const initTextRow = "                                                                    "  
 
-module.exports = class {
+export class TextBuffer {
   
   lines = [initTextRow, initTextRow, initTextRow, initTextRow]
   dirty = [true, true, true, true] // all dirty to start with!

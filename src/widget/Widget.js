@@ -1,14 +1,14 @@
-const Rx = require('rxjs')
+import { Subject, of, filter, map } from 'rxjs'
 
-module.exports = class {
+export class Widget {
   // event output
-  actions = new Rx.Subject()
+  actions = new Subject()
   
   /**
    * PushRx drawing commands to render this Widget.
    * @return {Observable<[Array]>} An Observable of arrays of commands
    */
-  displayObservable() { return Rx.of([]) }
+  displayObservable() { return of([]) }
   
   /**
    * PushRx drawing commands to remove this widget. Resets every Push UI element within
@@ -58,14 +58,14 @@ module.exports = class {
     if (!commands) { return null }
     const len = pfx.length
     return commands.pipe(
-      Rx.filter(cmd => cmd.length >= len && pfx.every((val, i) => val === cmd[i])),
-      Rx.map(cmd => cmd.slice(len))
+      filter(cmd => cmd.length >= len && pfx.every((val, i) => val === cmd[i])),
+      map(cmd => cmd.slice(len))
     )
   }
   
   // return an observable, prefixed
   static prefixedActions(actions, pfx) {
-    return actions.pipe(Rx.map(action => pfx.concat(action)))
+    return actions.pipe(map(action => pfx.concat(action)))
   }
 
 }

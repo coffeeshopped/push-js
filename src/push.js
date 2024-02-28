@@ -92,7 +92,7 @@ function intForChar(string, index) {
 
 const initTextRow = "                                                                    "
 
-class Push {
+export class Push {
   
   listenerCounter = 0
   listeners = []
@@ -295,4 +295,3 @@ class Push {
   
 }
 
-module.exports = Push
