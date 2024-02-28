@@ -1,8 +1,9 @@
-const Push = require("./push")
-const PushRx = require("./push.rx")
 const Rx = require('rxjs')
 const BehaviorSubject = Rx.BehaviorSubject
-const Widget = require('./push.widget')
+
+const Push = require("../push")
+const PushRx = require("../push.rx")
+const Widget = require('./Widget')
 
 
 function adjustValue(value, inc, min, max) {
@@ -60,6 +61,15 @@ module.exports = class extends Widget {
 
   displayObservable() {
     return Rx.merge(this.displayLabelObservable(), this.displayValueObservable(), this.displayVisualObservable())
+  }
+  
+  displayCleanup() {
+    const slot = this.slot
+    return [
+      PushRx.textCmd(0, slot, ""),
+      PushRx.textCmd(1, slot, ""),
+      PushRx.textCmd(2, slot, ""),
+    ]
   }
 
   subscribe(bundle) {

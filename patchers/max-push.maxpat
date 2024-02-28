@@ -40,13 +40,24 @@
 		"assistshowspatchername" : 0,
 		"boxes" : [ 			{
 				"box" : 				{
+					"id" : "obj-18",
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 25.0, 93.0, 120.0, 22.0 ],
+					"text" : "script npm install rxjs"
+				}
+
+			}
+, 			{
+				"box" : 				{
 					"id" : "obj-122",
 					"maxclass" : "message",
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 653.0, 99.0, 85.0, 22.0 ],
-					"presentation_linecount" : 2,
 					"text" : "cmd buttog $1"
 				}
 
@@ -59,7 +70,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 560.0, 99.0, 84.0, 22.0 ],
-					"presentation_linecount" : 2,
 					"text" : "cmd buttoff $1"
 				}
 
@@ -204,7 +214,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 29.0, 472.0, 173.0, 22.0 ],
-					"presentation_linecount" : 2,
 					"text" : "cmd page 0 knob $1 hidden $2"
 				}
 
@@ -1184,6 +1193,8 @@
 					"saved_object_attributes" : 					{
 						"autostart" : 1,
 						"defer" : 0,
+						"node_bin_path" : "",
+						"npm_bin_path" : "",
 						"watch" : 0
 					}
 ,
@@ -1411,6 +1422,13 @@
 				"patchline" : 				{
 					"destination" : [ "obj-51", 0 ],
 					"source" : [ "obj-16", 1 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-7", 0 ],
+					"source" : [ "obj-18", 0 ]
 				}
 
 			}
@@ -2019,7 +2037,7 @@
 			}
 , 			{
 				"name" : "pushtest.js",
-				"bootpath" : "~/Code/max-push/code",
+				"bootpath" : "~/Code/rig2/max-push/code",
 				"patcherrelativepath" : "../code",
 				"type" : "TEXT",
 				"implicit" : 1

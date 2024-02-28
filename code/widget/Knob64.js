@@ -1,14 +1,16 @@
-const Push = require("./push")
 const Rx = require('rxjs')
 const BehaviorSubject = Rx.BehaviorSubject
-const Widget = require('./push.widget')
-const Knob = require('./push.knob')
-const Pager = require('./push.pager')
+
+const Push = require("../push")
+const PushRx = require("../push.rx")
+const Widget = require('./Widget')
+const Knob = require('./Knob')
+const Pager = require('./Pager')
 
 module.exports = class extends Widget {
   
   knobs = []
-  pager = new Pager(8)
+  pager = new Pager(0, 8)
 
   constructor() {
     super()
@@ -33,24 +35,38 @@ module.exports = class extends Widget {
     return Rx.merge(this.pager.displayObservable(), kd)    
   }
   
+  displayCleanup() {
+    return this.pager.displayCleanup().concat([PushRx.clearTextCmd()])
+  }
+  
   subscribe(bundle) {
     const pager = this.pager
     const sub = pager.subscribe(bundle) // pager is always subscribed
+    
+    const processedCmds = bundle.commands.pipe(
+      Rx.mergeMap(cmd => {
+        if (cmd.length == 1 && cmd[0] == 'reset') {
+          return Rx.from(this.knobs.flatMap((knobPage, p) => {
+            return knobPage.map((knob, k) =>  ['page', p, 'knob', k, 'hidden', 1])
+          }))
+        }
+        return Rx.of(cmd)
+      })
+    )
     
     this.knobs.forEach((knobPage, p) => {
       const pfx = ['page', p]
       const newBundle = {
         turns: pager.value.pipe(Rx.switchMap(page => page == p ? bundle.turns : Rx.EMPTY)),
-        commands: Widget.filteredCommands(bundle.commands, pfx)
+        commands: Widget.filteredCommands(processedCmds, pfx)
       }
 
       knobPage.forEach(k => sub.add(k.subscribe(newBundle)))
       
       const knobActions = Rx.merge(...(knobPage.map((k, i) => k.actions)))
       sub.add(Widget.prefixedActions(knobActions, pfx).subscribe(this.actions))
-
     })
-            
+
     return sub
   }
   
