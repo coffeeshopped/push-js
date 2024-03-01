@@ -1,9 +1,9 @@
-const Rx = require('rxjs')
+import * as Rx from 'rxjs'
 const BehaviorSubject = Rx.BehaviorSubject
 
-const Push = require("../push")
-const PushRx = require("../push.rx")
-const Widget = require('./Widget')
+import { Push } from "../push.js"
+import { PushRx } from "../push.rx.js"
+import { Widget } from './Widget.js'
 
 
 function adjustValue(value, inc, min, max) {
@@ -11,7 +11,7 @@ function adjustValue(value, inc, min, max) {
   return v < min ? min : (v > max ? max : v)
 }
 
-module.exports = class extends Widget {
+export class Knob extends Widget {
   
   slot = 0
   label = new BehaviorSubject("knob.")
@@ -88,7 +88,7 @@ module.exports = class extends Widget {
     
     // TODO: add option to not self-update value
     const sub = Widget.prefixedActions(adjustedValue, ["knob", slot, "value"]).subscribe(this.actions)
-    // sub.add(adjustedValue.subscribe(this.value))
+    sub.add(adjustedValue.subscribe(this.value))
     
     const filteredCommands = Widget.filteredCommands(bundle.commands, ['knob', slot])
 

@@ -1,9 +1,9 @@
-const Rx = require('rxjs')
+import * as Rx from 'rxjs'
 const BehaviorSubject = Rx.BehaviorSubject
 
-const Push = require("../push")
-const PushRx = require("../push.rx")
-const Widget = require('./Widget')
+import { Push } from "../push.js"
+import { PushRx } from "../push.rx.js"
+import { Widget } from './Widget.js'
 
 function display(origin, rows, cols, value, on, off) {
   const cmds = []
@@ -16,7 +16,7 @@ function display(origin, rows, cols, value, on, off) {
   return cmds
 }
 
-module.exports = class extends Widget {
+export class PadRadio extends Widget {
   
   // the lower-left pad that the widget starts at
   origin = [0,0]

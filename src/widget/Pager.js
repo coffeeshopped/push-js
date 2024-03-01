@@ -1,8 +1,8 @@
-const Rx = require('rxjs')
+import * as Rx from 'rxjs'
 
-const Push = require("../push")
-const PushRx = require("../push.rx")
-const Widget = require('./Widget')
+import { Push } from "../push.js"
+import { PushRx } from "../push.rx.js"
+import { Widget } from './Widget.js'
 
 function display(row, value, pageCount) {
   let cmds = []
@@ -13,7 +13,7 @@ function display(row, value, pageCount) {
   return cmds
 }
 
-module.exports = class extends Widget {
+export class Pager extends Widget {
   
   value = new Rx.BehaviorSubject(0)
   pageCount = new Rx.BehaviorSubject(1)

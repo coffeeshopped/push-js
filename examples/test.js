@@ -1,30 +1,8 @@
 import { Push, PushRx } from "../src/index.js"
-import { Subject } from 'rxjs'
 import { getInputs, getOutputs, Input, Output } from 'easymidi';
-
-// console.log(getInputs())
-// console.log(getOutputs())
 
 const push = new Push()
 const pushRx = new PushRx(push)
-
-const commands = new Subject()
-
-const handlers = {
-  note: (note, velo) => push.noteIn(note, velo),
-  cc: (cc, value) => push.ccIn(cc, value),
-  cmd: function(...args) {
-    commands.next(args)
-    // switch (cmd) {
-    //   case "value":
-    //     state.knobs[slot].value.next(value)
-    //     break
-    //   case "label":
-    //     state.knobs[slot].label.next(value)
-    //     break        
-    // }    
-  },
-}
 
 const input = new Input("Ableton Push User Port")
 const output = new Output("Ableton Push User Port")
@@ -38,58 +16,32 @@ input.on('cc', msg => push.ccIn(msg.controller, msg.value))
 // input.on('poly aftertouch', msg => console.log('poly aftertouch', msg.note, msg.pressure, msg.channel));
 
 
-push.displayTextLine(0, "Hi Chadly!!!!")
+import { Knob64 } from '../src/widget/Knob64.js'
 
-const bundle = {
-  turns: pushRx.turns,
-  buttons: pushRx.buttons,
-  commands: commands,
-}
+const knob64 = new Knob64()
+pushRx.addWidget(knob64, "knob64")
 
-// const Knob64 = require('./widget/Knob64')
-// const knob64 = new Knob64()
-// knob64.subscribe(bundle)
-// pushRx.addDisplay(knob64.displayObservable())
-// knob64.actions.subscribe(action => {
-//   maxAPI.outlet(["action"].concat(action))
-// })
-// 
+// const knob = new Knob(0, "Knob 1")
+// bundle.commands.next(["knob", 0, "label", "what"])
+// bundle.commands.next(["knob", 0, "max", 500])
 
-import { Ttoggle } from '../src/widget/ttoggle.js'
+import { PadRadio } from '../src/widget/PadRadio.js'
+const radio = new PadRadio([0,0], 8, 8)
+pushRx.addWidget(radio, "radio")
 
-const toggles = []
-for (const key in Push.Button) { 
-  toggles.push(key)
-}
-const allT = toggles.map(t => {
-  const b = new Ttoggle(t)
-  b.subscribe(bundle)
-  pushRx.addDisplay(b.displayObservable())
-  b.actions.subscribe(action => {
-    // maxAPI.outlet(["action", t].concat(action))
-  })
-  return b
+pushRx.setActionHandler(action => {
+  // log every action on the Push to the console.
+  console.log(action)
+  
+  // turning knob 1 on page 1 sets the max value of knob 0 on page 1.
+  if (action.length == 7 && action[0] == "knob64" && action[1] == "page" && action[2] == 0 & action[3] == "knob" && action[4] == 1 && action[5] == "value") {
+    const v = action[6]
+    pushRx.cmd(["knob64", "page", 0, "knob", 0, "max", v])
+  }
 })
 
-// commands.subscribe(cmd => {
-//   if (cmd.length < 2) { return }
-//   switch (cmd[0]) {
-//     case "button":
-//       allT.forEach(tt => {
-//         tt.onState.next(cmd[1])
-//       })
-//       break
-//     case "buttoff":
-//       allT.forEach(tt => {
-//         tt.offState.next(cmd[1])
-//       })
-//       break
-//     case "buttog":
-//       allT.forEach(tt => {
-//         tt.value.next(cmd[1])
-//       })
-//       break
-// 
-// 
-//   }
-// })
+// periodically update the value of the radio
+setInterval(() => {
+  const x = Math.floor(Math.random() * 64)
+  pushRx.cmd(["radio", "value", x])
+}, 200)

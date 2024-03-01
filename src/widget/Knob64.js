@@ -1,13 +1,13 @@
-const Rx = require('rxjs')
+import * as Rx from 'rxjs'
 const BehaviorSubject = Rx.BehaviorSubject
 
-const Push = require("../push")
-const PushRx = require("../push.rx")
-const Widget = require('./Widget')
-const Knob = require('./Knob')
-const Pager = require('./Pager')
+import { Push } from "../push.js"
+import { PushRx } from "../push.rx.js"
+import { Widget } from './Widget.js'
+import { Knob } from './Knob.js'
+import { Pager } from './Pager.js'
 
-module.exports = class extends Widget {
+export class Knob64 extends Widget {
   
   knobs = []
   pager = new Pager(0, 8)

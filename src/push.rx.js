@@ -2,6 +2,7 @@
 import * as Rx from 'rxjs'
 import { Push } from "./push.js"
 import { TextBuffer } from './TextBuffer.js'
+import { Widget } from './widget/Widget.js'
 
 const Commands = {
   TEXT: 'TEXT',
@@ -22,6 +23,7 @@ export class PushRx {
   turns = new Rx.Subject()
   buttons = new Rx.Subject()
   pads = new Rx.Subject()
+  commands = new Rx.Subject()
 
   constructor(push) {
     this.push = push
@@ -41,6 +43,48 @@ export class PushRx {
           break
       }
     })
+    
+  }
+  
+  widgets = {}
+  widgetSubscriptions = {}
+  // event output
+  actions = new Rx.Subject()
+
+  
+  addWidget(widget, widgetId) {
+    // store widget reference
+    this.widgets[widgetId] = widget
+    
+    // subscribe the widget to events
+    // route any incoming commands to this widget.
+    const newBundle = {
+      turns: this.turns,
+      buttons: this.buttons,
+      pads: this.pads,
+      commands: Widget.filteredCommands(this.commands, [widgetId])
+    }
+    const sub = widget.subscribe(newBundle)
+    // add widget's actions to top-level action stream, prefixed by widgetId
+    sub.add(Widget.prefixedActions(widget.actions, [widgetId]).subscribe(this.actions))
+    // store subscription reference (for later removal)
+    this.widgetSubscriptions[widgetId] = sub
+    
+    // add this widget to rendering
+    this.addDisplay(widget.displayObservable()) 
+  }
+  
+  // process a command.
+  cmd(cmd) {
+    this.commands.next(cmd)
+  }
+  
+  actionSubscription = null
+  setActionHandler(callback) {
+    if (this.actionSubscription) {
+      this.actionSubscription.unsubscribe()
+    }
+    this.actionSubscription = this.actions.subscribe(callback)
   }
   
   addDisplay(display) {
