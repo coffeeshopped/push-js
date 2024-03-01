@@ -151,12 +151,15 @@ export class PushRx {
     }
   }
     
+  // set the text for a given row and slot (1/8th of the row)
   static textCmd = (row, slot, text) => [Commands.TEXT, row, slot, text + ""]
   
   static buttonCmd = (button, state) => [Commands.BUTTON, button, state]
   
+  // light up a pad, shortcut-style (preset colors)
   static padCmd = (x, y, state) => [Commands.PAD, x, y, state]
 
+  // light up a pad using full RGB value
   static fullPadCmd = (x, y, hexColor) => [Commands.FULL_PAD, x, y, hexColor]
   
   static clearTextCmd = () => [Commands.CLEAR_TEXT]
