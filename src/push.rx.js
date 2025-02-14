@@ -108,7 +108,7 @@ export class PushRx {
     })
     
     // group text commands together every 40 ms
-    const sub = textCmds.pipe(Rx.bufferTime(40)).subscribe(cmd => _this.handleText(cmd))
+    const sub = textCmds.pipe(Rx.bufferTime(40)).subscribe(cmds => _this.handleText(cmds))
     sub.add(otherCmds.subscribe(cmd => _this.handleOther(cmd)))
     return sub
   }
