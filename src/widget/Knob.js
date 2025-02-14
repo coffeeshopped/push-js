@@ -9,44 +9,63 @@ import { Widget } from './Widget.js'
 export class Knob extends Widget {
   
   // turns: increments (+/-) from the hardware knob
-  // TODO: add commands observable that gets listened to.
-  make(slot, label, min, max, inc, turns, cmds) {
-    
-    const value = turns.pipe(
-      Rx.withLatestFrom(inc, min, max),
-      Rx.map([turn, inc, min, max]),
-      Rx.scan((value, [turn, inc, min, max]) => {
-        const v = value + inc * turn
-        return v < min ? min : (v > max ? max : v)
-      }, 0)
-    )
-
+  make(slot, initState) {
     return {
-      value: value,
+      inputs: {
+        knob: {
+          type: 'topknob',
+          index: slot,
+        },
+        cmds: {
+          type: 'cmd',
+        },
+      },
+      state: (inputs) => {
+        // translate knob turns into text cmds
+        const turnCmds = inputs.knob.pipe(
+          Rx.map(turn => ['inc', turn])
+        )
+        return Rx.merge(turnCmds, input.cmds).pipe(
+          Rx.scan((state, cmd) => {
+            switch (cmd[0]) {
+              case 'inc':
+                const v = state.value + state.inc * cmd[1]
+                state.value = v < state.min ? state.min : (v > state.max ? state.max : v)
+                break
+              case 'set':
+                state.value = cmd[1]
+                break
+            }
+            return state
+          }, initState || {
+            label: 'Knob',
+            min: 0,
+            max: 127,
+            inc: 1,
+            value: 0,
+          })
+        )
+      },
       display: [
         {
           type: 'text-slot',
           row: 0,
           slot: slot,
-          text: label.pipe(
-            Rx.map(l => l)
-          )
+          text: state.pipe(Rx.map(s => s.label)),
         },
         {
           type: 'text-slot',
           row: 1,
           slot: slot,
-          text: value.pipe(
-            Rx.map(v => `${v}`)
-          )
+          text: state.pipe(Rx.map(s => `${s.value}`)),
         },
         {
           type: 'text-slot',
           row: 2,
           slot: slot,
-          text: Rx.combineLatest(value, min, max).pipe(
-            Rx.map(([v, min, max]) => {
-              const pct = Math.max(0.0, Math.min((v - min) / (max - min), 1.0))
+          text: state.pipe(
+            Rx.map(s => {
+              const pct = Math.max(0.0, Math.min((s.value - s.min) / (s.max - s.min), 1.0))
               const bars = Math.floor(pct * 16.0)
               const doubleBars = Math.floor(bars / 2)
               const singleBars = bars % 2
@@ -54,23 +73,10 @@ export class Knob extends Widget {
               return "║".repeat(doubleBars) + "├".repeat(singleBars) + "─".repeat(dashes)
             })
           )
-,
+  ,
         },
       ]
     }
-  }
-  
-
-  subscribe(bundle) {
-    // each time a turn event comes in, if it's the knob we're watching, output what the adjusted value should be
-    // based on inc, max, min
-    const slot = this.slot
-    const latest = Rx.withLatestFrom(this.value, this.inc, this.min, this.max, this.hidden)
-        
-    // TODO: add option to not self-update value
-    const sub = Widget.prefixedActions(adjustedValue, ["knob", slot, "value"]).subscribe(this.actions)
-    sub.add(adjustedValue.subscribe(this.value))
-    return sub
   }
   
   
