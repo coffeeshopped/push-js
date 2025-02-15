@@ -56,22 +56,39 @@ export class PushRx {
     // store widget reference
     this.widgets[widgetId] = widget
     
-    // subscribe the widget to events
-    // route any incoming commands to this widget.
-    const newBundle = {
-      turns: this.turns,
-      buttons: this.buttons,
-      pads: this.pads,
-      commands: Widget.filteredCommands(this.commands, [widgetId])
+    // get the requested input resources
+    const widgetInputs = { }
+    for (const key in widget.inputs) {
+      const input = widget.inputs[key]
+      switch (input.type) {
+        case 'knob':
+          widgetInputs[key] = this.turns.pipe(
+            Rx.filter(turn => turn[0] - 0x47 == input.slot),
+            Rx.map(turn => turn[1])
+          )
+          break
+        case 'cmd':
+          widgetInputs[key] = this.commands
+          break
+      }
     }
-    const sub = widget.subscribe(newBundle)
-    // add widget's actions to top-level action stream, prefixed by widgetId
-    sub.add(Widget.prefixedActions(widget.actions, [widgetId]).subscribe(this.actions))
-    // store subscription reference (for later removal)
-    this.widgetSubscriptions[widgetId] = sub
     
-    // add this widget to rendering
-    this.addDisplay(widget.displayObservable()) 
+    // now that we have the inputs, get the state
+    const state = widget.state(widgetInputs)
+    const display = widget.display(state)
+    
+    display.forEach(d => {
+      switch (d.type) {
+        case 'text-slot':
+          const dispObs = d.text.pipe(
+            Rx.map(str => [PushRx.textCmd(d.row, d.slot, str)])
+          )
+          // add this widget to rendering
+          this.addDisplay(dispObs) 
+          break
+      }
+    })
+    
   }
   
   // process a command.
@@ -115,6 +132,8 @@ export class PushRx {
   
   // handle a batch of text-related commands, condensing them where possible
   handleText(cmds) {
+    if (cmds.length == 0) { return }
+    console.log(cmds)
     const _this = this
     cmds.forEach(cmd => {
       if (cmd.length < 1) { return }
