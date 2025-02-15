@@ -42,7 +42,7 @@ pushRx.setActionHandler(action => {
 
 pushRx.cmd(['knob', 1])
 pushRx.cmd(['knob', 1])
-pushRx.cmd(['set', 50])
+pushRx.cmd(['set', 63])
 pushRx.cmd(['knob', 1])
 
 // periodically update the value of the radio

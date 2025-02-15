@@ -7,66 +7,53 @@ export const makeKnob = (slot, initState) => ({
       type: 'knob',
       index: slot,
     },
-    cmds: {
-      type: 'cmd',
-    },
   },
   // a fn that is passed the requested inputs and returns an Observable
-  state: inputs => {
-    // translate knob turns into text cmds
-    const turnCmds = inputs.knob.pipe(
-      Rx.map(turn => ['knob', turn])
-    )
-    return Rx.merge(turnCmds, inputs.cmds).pipe(
-      Rx.scan((state, cmd) => {
-        switch (cmd[0]) {
-          case 'knob':
-            const v = state.value + state.inc * cmd[1]
-            state.value = v < state.min ? state.min : (v > state.max ? state.max : v)
-            break
-          case 'set':
-            state.value = cmd[1]
-            break
-        }
-        return state
-      }, initState || {
-        label: 'Knob',
-        min: 0,
-        max: 127,
-        inc: 1,
-        value: 0,
-      }),
-      Rx.share(),
-    )
+  next: (state, cmd) => {
+    switch (cmd[0]) {
+      case 'knob':
+        const v = state.value + state.inc * cmd[1]
+        state.value = v < state.min ? state.min : (v > state.max ? state.max : v)
+        break
+      case 'set':
+        state.value = cmd[1]
+        break
+    }
+    return state
+  },
+  state: initState || {
+    label: 'Knob',
+    min: 0,
+    max: 127,
+    inc: 1,
+    value: 0,
   },
   // the requested display (output) resources on the Push
-  display: (state) => [
+  display: [
     {
       type: 'text-slot',
       row: 0,
       slot: slot,
-      text: state.pipe(Rx.map(s => s.label)),
+      text: s => s.label,
     },
     {
       type: 'text-slot',
       row: 1,
       slot: slot,
-      text: state.pipe(Rx.map(s => `${s.value}`)),
+      text: s => `${s.value}`,
     },
     {
       type: 'text-slot',
       row: 2,
       slot: slot,
-      text: state.pipe(
-        Rx.map(s => {
-          const pct = Math.max(0.0, Math.min((s.value - s.min) / (s.max - s.min), 1.0))
-          const bars = Math.floor(pct * 16.0)
-          const doubleBars = Math.floor(bars / 2)
-          const singleBars = bars % 2
-          const dashes = 8 - (doubleBars + singleBars)
-          return "║".repeat(doubleBars) + "├".repeat(singleBars) + "─".repeat(dashes)
-        })
-      ),
+      text: s => {
+        const pct = Math.max(0.0, Math.min((s.value - s.min) / (s.max - s.min), 1.0))
+        const bars = Math.floor(pct * 16.0)
+        const doubleBars = Math.floor(bars / 2)
+        const singleBars = bars % 2
+        const dashes = 8 - (doubleBars + singleBars)
+        return "║".repeat(doubleBars) + "├".repeat(singleBars) + "─".repeat(dashes)
+      },
     },
   ],
 })

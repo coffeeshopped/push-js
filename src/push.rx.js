@@ -57,31 +57,30 @@ export class PushRx {
     this.widgets[widgetId] = widget
     
     // get the requested input resources
-    const widgetInputs = { }
+    const cmds = [this.commands]
     for (const key in widget.inputs) {
       const input = widget.inputs[key]
       switch (input.type) {
         case 'knob':
-          widgetInputs[key] = this.turns.pipe(
+          cmds.push(this.turns.pipe(
             Rx.filter(turn => turn[0] - 0x47 == input.slot),
-            Rx.map(turn => turn[1])
-          )
-          break
-        case 'cmd':
-          widgetInputs[key] = this.commands
+            Rx.map(turn => [key, turn[1]])
+          ))
           break
       }
     }
     
     // now that we have the inputs, get the state
-    const state = widget.state(widgetInputs)
-    const display = widget.display(state)
+    const state = Rx.merge(...cmds).pipe(
+      Rx.scan(widget.next, widget.state),
+      Rx.share(),
+    )
     
-    display.forEach(d => {
+    widget.display.forEach(d => {
       switch (d.type) {
         case 'text-slot':
-          const dispObs = d.text.pipe(
-            Rx.map(str => [PushRx.textCmd(d.row, d.slot, str)])
+          const dispObs = state.pipe(
+            Rx.map(s => [PushRx.textCmd(d.row, d.slot, d.text(s))])
           )
           // add this widget to rendering
           this.addDisplay(dispObs) 
