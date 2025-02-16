@@ -4,16 +4,16 @@ import { getInputs, getOutputs, Input, Output } from 'easymidi';
 const push = new Push()
 const pushRx = new PushRx(push)
 
-// const input = new Input("Ableton Push User Port")
-// const output = new Output("Ableton Push User Port")
-// 
-// // send midi from our JS Push to the unit
-// push.midiOutListener = (bytes) => output._output.sendMessage(bytes)
-// // receive Midi from the unit and handle it
-// input.on('noteon', msg => push.noteIn(msg.note, msg.velocity))
-// input.on('noteoff', msg => push.noteIn(msg.note, 0))
-// input.on('cc', msg => push.ccIn(msg.controller, msg.value))
-// input.on('poly aftertouch', msg => console.log('poly aftertouch', msg.note, msg.pressure, msg.channel));
+const input = new Input("Ableton Push User Port")
+const output = new Output("Ableton Push User Port")
+
+// send midi from our JS Push to the unit
+push.midiOutListener = (bytes) => output._output.sendMessage(bytes)
+// receive Midi from the unit and handle it
+input.on('noteon', msg => push.noteIn(msg.note, msg.velocity))
+input.on('noteoff', msg => push.noteIn(msg.note, 0))
+input.on('cc', msg => push.ccIn(msg.controller, msg.value))
+input.on('poly aftertouch', msg => console.log('poly aftertouch', msg.note, msg.pressure, msg.channel));
 
 
 import { makeKnob } from '../src/widget/knob.js'

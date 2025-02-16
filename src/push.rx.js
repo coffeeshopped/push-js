@@ -63,14 +63,14 @@ export class PushRx {
       switch (input.type) {
         case 'knob':
           cmds.push(this.turns.pipe(
-            Rx.filter(turn => turn[0] - 0x47 == input.slot),
+            Rx.filter(turn => turn[0] - 0x47 == input.index),
             Rx.map(turn => [key, turn[1]])
           ))
           break
         case 'button-row':
-          for (const i=0; i<8; ++i) {
+          for (let i=0; i<8; ++i) {
             cmds.push(this.buttons.pipe(
-              Rx.filter(btn => (btn[0] - (0x14 + (row * 0x52))) == i),
+              Rx.filter(btn => (btn[0] - (0x14 + (input.row * 0x52))) == i),
               Rx.map(btn => [key, i, btn[1]])
             ))
           }
@@ -91,7 +91,7 @@ export class PushRx {
           mapFn = s => [PushRx.textCmd(d.row, d.slot, d.text(s))]
           break
         case 'button-row':
-          mapFn = s => d.values(s).map(v, i => PushRx.buttonCmd(i + 0x14 + row * 0x52, v))
+          mapFn = s => d.values(s).map((v, i) => PushRx.buttonCmd(i + 0x14 + d.row * 0x52, v))
           break
       }
       if (!mapFn) { return }
