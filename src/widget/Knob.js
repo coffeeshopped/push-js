@@ -1,4 +1,3 @@
-import * as Rx from 'rxjs'
 
 export const makeKnob = (slot, initState) => ({
   // the input sources requested

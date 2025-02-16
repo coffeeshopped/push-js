@@ -67,6 +67,14 @@ export class PushRx {
             Rx.map(turn => [key, turn[1]])
           ))
           break
+        case 'button-row':
+          for (const i=0; i<8; ++i) {
+            cmds.push(this.buttons.pipe(
+              Rx.filter(btn => (btn[0] - (0x14 + (row * 0x52))) == i),
+              Rx.map(btn => [key, i, btn[1]])
+            ))
+          }
+          break
       }
     }
     
@@ -77,15 +85,18 @@ export class PushRx {
     )
     
     widget.display.forEach(d => {
+      var mapFn = null
       switch (d.type) {
         case 'text-slot':
-          const dispObs = state.pipe(
-            Rx.map(s => [PushRx.textCmd(d.row, d.slot, d.text(s))])
-          )
-          // add this widget to rendering
-          this.addDisplay(dispObs) 
+          mapFn = s => [PushRx.textCmd(d.row, d.slot, d.text(s))]
+          break
+        case 'button-row':
+          mapFn = s => d.values(s).map(v, i => PushRx.buttonCmd(i + 0x14 + row * 0x52, v))
           break
       }
+      if (!mapFn) { return }
+      const dispObs = state.pipe(Rx.map(mapFn))
+      this.addDisplay(dispObs)
     })
     
   }

@@ -17,9 +17,11 @@ const pushRx = new PushRx(push)
 
 
 import { makeKnob } from '../src/widget/knob.js'
-
 const knob = makeKnob(0)
 pushRx.addWidget(knob, "knob0")
+
+import { makePager } from '../src/widget/pager.js'
+pushRx.addWidget(makePager(0, 5), "pager0")
 
 // const knob = new Knob(0, "Knob 1")
 // bundle.commands.next(["knob", 0, "label", "what"])
