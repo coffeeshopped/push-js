@@ -44,7 +44,7 @@ EVENTS
 
 
 const displayStack = ?.pipe(
-	Rx.scan((stack, cmd) => {
+	Rx.switchScan((stack, cmd) => {
 		switch (cmd[0]) {
 			case "add":
         stack.push([cmd[1], cmd[2]])
@@ -57,4 +57,8 @@ const displayStack = ?.pipe(
 		}
     return stack
 	}, [])
+)
+
+displayStack.pipe(
+  
 )
