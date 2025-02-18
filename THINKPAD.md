@@ -11,3 +11,5 @@ A widget can be a composite of other widgets?
 A windowing system(?) takes these declarations into account to route commands for drawing, and input to where it needs to go.
 
 If a widget is a child of another widget, and the child declares resources that are not declared by the parent widget, an error occurs. Or maybe it just gets silently clipped, but that seems likely to lead to confusion.
+
+Each resource maintains a(n observable) stack of the latest commands for what to display on that resource. When a new version of that stack comes through, whatever is on top gets displayed.

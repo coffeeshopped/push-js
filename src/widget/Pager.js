@@ -13,8 +13,7 @@ export function makePager(row, pageCount, initState) {
         case 'buttons':
           // b: button, state
           const i = cmd[1] // button index 0..7
-          const v = cmd[2] // value (0=up, 1=down)
-          
+          const v = cmd[2] // value (false=up, true=down)
           // ignore button up
           if (v && i >= 0 && i < pageCount) { 
             state.value = i
