@@ -24,7 +24,26 @@ export class PushRx {
   buttons = new Rx.Subject()
   pads = new Rx.Subject()
   commands = new Rx.Subject()
-
+  subscription = new Rx.Subscription()
+  
+  textCommands = [
+    new Rx.Subject(),
+    new Rx.Subject(),
+    new Rx.Subject(),
+    new Rx.Subject(),
+  ]
+  
+  knobCommands = [
+    new Rx.Subject(),
+    new Rx.Subject(),
+    new Rx.Subject(),
+    new Rx.Subject(),
+    new Rx.Subject(),
+    new Rx.Subject(),
+    new Rx.Subject(),
+    new Rx.Subject(),
+  ]
+  
   constructor(push) {
     this.push = push
     
@@ -44,6 +63,14 @@ export class PushRx {
       }
     })
     
+    // set up text buffers
+    this.textCommands.forEach((subject, i) => {
+      _this.makeTextBuffer(subject, i)
+    })
+    
+    this.knobCommands.forEach((subject, i) => {
+      _this.makeKnobRouter(subject, i)
+    })
   }
   
   widgets = {}
@@ -57,15 +84,18 @@ export class PushRx {
     this.widgets[widgetId] = widget
     
     // get the requested input resources
+    // TODO need to scope the commands (filter) by widgetId
     const cmds = [this.commands]
     for (const key in widget.inputs) {
       const input = widget.inputs[key]
       switch (input.type) {
         case 'knob':
-          cmds.push(this.turns.pipe(
-            Rx.filter(turn => turn[0] - 0x47 == input.index),
-            Rx.map(turn => [key, turn[1]])
-          ))
+          const subj = new Rx.Subject()
+          const mapped = subj.pipe(
+            Rx.map(turn => [key, turn])
+          )
+          cmds.push(mapped)
+          this.knobCommands[input.index].next(["add", widgetId, subj])
           break
         case 'button-row':
           for (let i=0; i<8; ++i) {
@@ -79,26 +109,122 @@ export class PushRx {
     }
     
     // now that we have the inputs, get the state
+    const stateBehavior = new Rx.BehaviorSubject(widget.state)
     const state = Rx.merge(...cmds).pipe(
-      Rx.scan(widget.next, widget.state),
-      Rx.share(),
+      Rx.scan(widget.next, widget.state)
     )
+    this.subscription.add(state.subscribe(stateBehavior))
     
     widget.display.forEach(d => {
-      var mapFn = null
       switch (d.type) {
         case 'text-slot':
-          mapFn = s => [PushRx.textCmd(d.row, d.slot, d.text(s))]
+          const slotStart = d.slot * 8 + Math.ceil(d.slot / 2.0)
+          const slotEnd = slotStart + 8
+          const dispObs = stateBehavior.pipe(Rx.map(s => {
+            // startCol, endCol, text
+            return [slotStart, slotEnd, d.text(s)]
+          }))
+          this.textCommands[d.row].next(["add", widgetId, dispObs])
+          return
           break
         case 'button-row':
-          mapFn = s => d.values(s).map((v, i) => PushRx.buttonCmd(i + 0x14 + d.row * 0x52, v))
+          const mapFn = s => d.values(s).map((v, i) => PushRx.buttonCmd(i + 0x14 + d.row * 0x52, v))
+          this.addDisplay(stateBehavior.pipe(Rx.map(mapFn)))
           break
       }
-      if (!mapFn) { return }
-      const dispObs = state.pipe(Rx.map(mapFn))
-      this.addDisplay(dispObs)
     })
     
+  }
+  
+  // ["add", <id>, Subject]
+  // ["remove", <id>]
+  makeKnobRouter(cmds, knobIndex) {
+    // takes in commands to add/remove/etc and maintains an inner stack of Subjects to receive knob input
+    // outputs the Subject at the top of the stack.
+    const current = cmds.pipe(
+      Rx.scan((stack, cmd) => {
+        switch (cmd[0]) {
+          case "add":
+            stack.push([cmd[1], cmd[2]])
+            break
+          case "remove":
+            stack = stack.filter(a => a[0] != cmd[1])
+            break
+          // case "moveTop":
+          //   break
+        }
+        return stack
+      }, []),
+      // return the top Subject
+      Rx.map(stack => stack.length == 0 ? null : stack[stack.length - 1][1])
+    )
+    
+    // subscribe to this knob's turns, and route those turns to the top-most Subject on the stack
+    const sub = this.turns.pipe(
+      Rx.filter(turn => turn[0] - 0x47 == knobIndex),
+      Rx.map(turn => turn[1]),
+      Rx.withLatestFrom(current)
+    ).subscribe(([turn, current]) => {
+      current.next(turn)
+    })
+    this.subscription.add(sub)
+  }
+  
+  // const cmds = Rx.of(
+  //   ["add", "first", BehaviorSubject],
+  //   ["add", "second", BehaviorSubject],
+  //   ["add", "third", BehaviorSubject],
+  //   ["remove", "second"],
+  //   ["add", "fourth", BehaviorSubject],
+  //   ["remove", "first"]
+  // )
+  
+  // ["add", <id>, BehaviorSubject]
+  // ["remove", <id>]
+  makeTextBuffer(cmds, rowIndex) {
+    const _this = this
+    const displayStack = cmds.pipe(
+      Rx.scan((stack, cmd) => {
+        switch (cmd[0]) {
+          case "add":
+            stack.push([cmd[1], cmd[2]])
+            break
+          case "remove":
+            stack = stack.filter(a => a[0] != cmd[1])
+            break
+          // case "moveTop":
+          //   break
+        }
+        return stack
+      }, []),
+      // get just the BehaviorSubjects (already sorted by z-index)
+      Rx.map(stack => stack.map(a => a[1])),
+      Rx.switchScan((acc, stack) => {
+        return Rx.combineLatest(stack)
+      })
+    )
+    // [0, text...]
+    // [startCol, endCol, text]
+    const sub = displayStack.subscribe(cmds => {
+      // this is inefficient, but for now, just go back to front and draw every one of them.
+      let row = "                                                                    "
+      cmds.forEach(cmd => {
+        // pad the text
+        const text = cmd[2]
+        let padded = text
+        const width = cmd[1] - cmd[0]
+        if (text.length > width) {
+          padded = text.slice(0,width)
+        }
+        else if (text.length < width) {
+          padded = text.padEnd(width, ' ')
+        }            
+
+        row = row.slice(0, cmd[0]) + padded + row.slice(cmd[1])
+      })
+      _this.push.displayTextLine(rowIndex, row)    
+    })
+    this.subscription.add(sub)
   }
   
   // process a command.

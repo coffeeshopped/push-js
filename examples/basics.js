@@ -2,10 +2,12 @@ import * as Rx from 'rxjs'
 const BehaviorSubject = Rx.BehaviorSubject
 
 
+const cSub = new Rx.Subject()
+cSub.next("c")
 const cmds = Rx.of(
   ["add", "first", Rx.of('a')],
   ["add", "second", Rx.of('b')],
-  ["add", "third", Rx.of('c')],
+  ["add", "third", cSub],
   ["remove", "second"],
   ["add", "fourth", Rx.of('d')],
   ["remove", "first"]
@@ -32,11 +34,17 @@ const displayStack = cmds.pipe(
     })
   }),
   Rx.switchScan((acc, stack) => {
-    return Rx.merge(...stack)
+    return Rx.combineLatest(stack)
   })
 )
 
-displayStack.subscribe(s => console.log(s))
+displayStack.subscribe(s => {
+  console.log('new stack')
+  console.log(s)
+})
+
+cSub.next("CEEEEMEEE")
+
 // const min = new BehaviorSubject(0)
 // const max = new BehaviorSubject(127)
 // 

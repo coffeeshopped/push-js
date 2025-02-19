@@ -20,13 +20,13 @@ export const makeKnob = (slot, initState) => ({
     }
     return state
   },
-  state: initState || {
+  state: Object.assign({
     label: 'Knob',
     min: 0,
     max: 127,
     inc: 1,
     value: 0,
-  },
+  }, initState),
   // the requested display (output) resources on the Push
   display: [
     {

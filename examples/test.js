@@ -17,8 +17,10 @@ input.on('poly aftertouch', msg => console.log('poly aftertouch', msg.note, msg.
 
 
 import { makeKnob } from '../src/widget/knob.js'
-const knob = makeKnob(0)
-pushRx.addWidget(knob, "knob0")
+
+pushRx.addWidget(makeKnob(0, {label: "One"}), "knob0")
+pushRx.addWidget(makeKnob(1, {label: "tahoo", max: 10}), "knob1")
+pushRx.addWidget(makeKnob(3, {label: "FOOR", min: 20, value: 54}), "knob3")
 
 import { makePager } from '../src/widget/pager.js'
 pushRx.addWidget(makePager(0, 5), "pager0")
@@ -42,10 +44,10 @@ pushRx.setActionHandler(action => {
   // }
 })
 
-pushRx.cmd(['knob', 1])
-pushRx.cmd(['knob', 1])
-pushRx.cmd(['set', 63])
-pushRx.cmd(['knob', 1])
+// pushRx.cmd(['knob', 1])
+// pushRx.cmd(['knob', 1])
+// pushRx.cmd(['set', 63])
+// pushRx.cmd(['knob', 1])
 
 // periodically update the value of the radio
 // setInterval(() => {
