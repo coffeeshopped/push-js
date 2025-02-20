@@ -16,11 +16,11 @@ input.on('cc', msg => push.ccIn(msg.controller, msg.value))
 input.on('poly aftertouch', msg => console.log('poly aftertouch', msg.note, msg.pressure, msg.channel));
 
 
-import { makeKnob } from '../src/widget/knob.js'
+import { knob } from '../src/widget/knob.js'
 
-pushRx.addWidget(makeKnob(0, {label: "One"}), "knob0")
-pushRx.addWidget(makeKnob(1, {label: "tahoo", max: 10}), "knob1")
-pushRx.addWidget(makeKnob(3, {label: "FOOR", min: 20, value: 54}), "knob3")
+pushRx.addWidget(knob(0, {label: "One"}), "knob0")
+pushRx.addWidget(knob(1, {label: "tahoo", max: 10}), "knob1")
+pushRx.addWidget(knob(3, {label: "FOOR", min: 20, value: 54}), "knob3")
 
 import { makePager } from '../src/widget/pager.js'
 pushRx.addWidget(makePager(0, 5), "pager0")

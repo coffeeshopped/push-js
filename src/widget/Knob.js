@@ -1,5 +1,5 @@
 
-export const makeKnob = (slot, initState) => ({
+export const knob = (slot, initState) => ({
   // the input sources requested
   inputs: {
     knob: {
